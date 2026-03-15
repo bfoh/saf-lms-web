@@ -9,11 +9,25 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@livekit/components-react": "^2.9.20",
+    "@livekit/components-styles": "^1.2.0",
+    "@saf/shared-types": "*",
+    "@saf/ui-kit": "*",
+    "@supabase/ssr": "^0.9.0",
+    "@supabase/supabase-js": "^2.99.0",
+    "fix-webm-duration": "^1.0.6",
+    "jspdf": "^4.2.0",
+    "livekit-client": "^2.17.3",
+    "livekit-server-sdk": "^2.15.0",
+    "lucide-react": "^0.577.0",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "recharts": "^3.8.0",
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.15.9",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
