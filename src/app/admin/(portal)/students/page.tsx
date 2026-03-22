@@ -97,6 +97,23 @@ export default function StudentsPage() {
         }
     };
 
+    const handleDelete = async (id: string, name: string) => {
+        if (!confirm(`Are you sure you want to completely delete ${name}? This action cannot be undone.`)) return;
+        try {
+            setIsSaving(true);
+            await fetchApi(`/users/${id}`, {
+                method: 'DELETE',
+            });
+            loadStudents();
+            setManagingStudent(null);
+        } catch (error: any) {
+            console.error(`Failed to delete student:`, error);
+            alert(error.message || `Failed to delete student.`);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
     // Derived state for filtering
     const filteredStudents = useMemo(() => {
         return students.filter((student) => {
@@ -377,6 +394,15 @@ export default function StudentsPage() {
                                 className={`w-full px-4 py-2 mt-2 text-sm font-medium text-left rounded-lg transition-colors flex items-center justify-between ${managingStudent.isActive ? 'text-red-600 bg-white border border-red-200 hover:bg-red-50' : 'text-green-600 bg-white border border-green-200 hover:bg-green-50'}`}
                             >
                                 {managingStudent.isActive ? 'Deactivate Account' : 'Activate Account'}
+                                {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+                            </button>
+
+                            <button
+                                disabled={isSaving}
+                                onClick={() => handleDelete(managingStudent.id, `${managingStudent.firstName} ${managingStudent.lastName}`)}
+                                className="w-full px-4 py-2 mt-2 text-sm font-medium text-left rounded-lg transition-colors flex items-center justify-between text-red-700 bg-red-50 border border-red-200 hover:bg-red-100"
+                            >
+                                Delete Account Permanently
                                 {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
                             </button>
                         </div>
