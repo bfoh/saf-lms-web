@@ -143,15 +143,18 @@ export default function AdminDashboard() {
     const [isLoading, setIsLoading] = useState(true);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [branch, setBranch] = useState("All Branches");
+    const [slowLoad, setSlowLoad] = useState(false);
 
     const load = (b?: string) => {
         setIsLoading(true);
         setLoadError(null);
+        setSlowLoad(false);
+        const slowTimer = setTimeout(() => setSlowLoad(true), 6000);
         const query = b && b !== "All Branches" ? `?branch=${encodeURIComponent(b)}` : "";
         fetchApi(`/analytics/admin-dashboard${query}`)
             .then((data: any) => setM(data))
             .catch((err: any) => setLoadError(err?.message || "Failed to load dashboard metrics"))
-            .finally(() => setIsLoading(false));
+            .finally(() => { clearTimeout(slowTimer); setIsLoading(false); setSlowLoad(false); });
     };
 
     useEffect(() => { load(); }, []);
@@ -181,6 +184,11 @@ export default function AdminDashboard() {
         <div className="flex flex-col items-center justify-center h-96 gap-3 text-gray-400">
             <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
             <p className="text-sm">Loading dashboard…</p>
+            {slowLoad && (
+                <p className="text-xs text-gray-400 max-w-xs text-center">
+                    The server is warming up — this can take up to 30s on the first request.
+                </p>
+            )}
         </div>
     );
 

@@ -19,7 +19,9 @@ export async function fetchApi<T>(path: string, options?: RequestInit): Promise<
         headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const res = await fetch(`${BASE_URL}${path}`, { ...options, headers });
+    // 35-second timeout — long enough to survive Render free-tier cold starts
+    const signal = options?.signal ?? AbortSignal.timeout(35_000);
+    const res = await fetch(`${BASE_URL}${path}`, { ...options, headers, signal });
 
     const contentType = res.headers.get('content-type');
     const isJson = contentType && contentType.includes('application/json');

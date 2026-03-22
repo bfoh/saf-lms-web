@@ -150,20 +150,29 @@ export default function StudentDashboard() {
                 setInvoices(mine.length > 0 ? mine : []);
             }
 
-            // ── Supabase queries (parallel) ──
-            const [enrollResult, submissionsResult, resourcesResult] = await Promise.allSettled([
-                // Classes this student is enrolled in
-                supabase.from('class_enrollments').select('class_id').eq('student_id', user.id),
-                // Submissions to compute skill scores and update assignment status
-                supabase.from('submissions')
-                    .select('*')
-                    .eq('student_id', user.id),
-                // Library picks matching student CEFR level
-                supabase.from('resources')
-                    .select('id, title, type, cefr_level, file_url')
-                    .eq('cefr_level', cefrLevel)
-                    .order('created_at', { ascending: false })
-                    .limit(3),
+            // ── Supabase queries + Live Classroom checks in parallel ──
+            const classesList = classesRes.status === 'fulfilled' && Array.isArray(classesRes.value)
+                ? classesRes.value
+                : [];
+
+            const [[enrollResult, submissionsResult, resourcesResult], sessionResults] = await Promise.all([
+                Promise.allSettled([
+                    // Classes this student is enrolled in
+                    supabase.from('class_enrollments').select('class_id').eq('student_id', user.id),
+                    // Submissions to compute skill scores and update assignment status
+                    supabase.from('submissions')
+                        .select('*')
+                        .eq('student_id', user.id),
+                    // Library picks matching student CEFR level
+                    supabase.from('resources')
+                        .select('id, title, type, cefr_level, file_url')
+                        .eq('cefr_level', cefrLevel)
+                        .order('created_at', { ascending: false })
+                        .limit(3),
+                ]),
+                Promise.allSettled(
+                    classesList.map(c => fetchApi<any>(`/live-classroom/class/${c.id}/active`))
+                ),
             ]);
 
             // Enrolled class IDs
@@ -176,7 +185,7 @@ export default function StudentDashboard() {
             if (submissionsResult.status === 'fulfilled' && !submissionsResult.value.error) {
                 const subs = submissionsResult.value.data ?? [];
                 setSubmissions(subs);
-                
+
                 const gradedSubs = subs.filter((s: any) => s.status === 'graded' && s.score !== null);
                 const byType: Record<string, number[]> = {};
                 for (const s of gradedSubs) {
@@ -198,20 +207,15 @@ export default function StudentDashboard() {
                 setLibraryPicks(resourcesResult.value.data ?? []);
             }
 
-            // ── Live Classroom checks ──
-            if (classesRes.status === 'fulfilled' && Array.isArray(classesRes.value)) {
-                const sessionResults = await Promise.allSettled(
-                    classesRes.value.map(c => fetchApi<any>(`/live-classroom/class/${c.id}/active`))
-                );
-                const sessions: Record<string, string> = {};
-                classesRes.value.forEach((cls, i) => {
-                    const res = sessionResults[i];
-                    if (res.status === 'fulfilled' && res.value?.id) {
-                        sessions[cls.id] = res.value.id;
-                    }
-                });
-                setActiveSessions(sessions);
-            }
+            // Live Classroom sessions
+            const sessions: Record<string, string> = {};
+            classesList.forEach((cls, i) => {
+                const res = sessionResults[i];
+                if (res.status === 'fulfilled' && res.value?.id) {
+                    sessions[cls.id] = res.value.id;
+                }
+            });
+            setActiveSessions(sessions);
 
         } catch {
             setLoadError('Failed to load dashboard. Please try again.');
