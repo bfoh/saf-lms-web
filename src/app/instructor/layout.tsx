@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useNotifications } from '@/context/NotificationContext';
+import Image from 'next/image';
 
 const navGroups = [
     {
@@ -65,16 +66,14 @@ export default function InstructorLayout({ children }: { children: React.ReactNo
             {/* Sidebar */}
             <aside className="w-60 bg-white border-r border-gray-100 flex flex-col sticky top-0 h-screen">
                 {/* Logo */}
-                <div className="h-16 flex items-center px-5 border-b border-gray-100">
-                    <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-                            style={{ background: '#0F6B3E' }}>
-                            LM
-                        </div>
-                        <div>
-                            <p className="text-sm font-bold text-gray-900">LinguaMeister</p>
-                            <p className="text-[10px] text-gray-400 font-semibold uppercase tracking-wider">Instructor</p>
-                        </div>
+                <div className="h-28 flex items-center justify-center px-4 border-b border-gray-100">
+                    <div className="relative h-24 w-52">
+                        <Image
+                            src="/saflogo.png"
+                            alt="SAF Institute"
+                            fill
+                            className="object-contain"
+                        />
                     </div>
                 </div>
 
