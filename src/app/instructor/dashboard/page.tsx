@@ -12,7 +12,7 @@ import { fetchApi } from '@/lib/api';
 
 // ─── Skill Radar (Spider) Chart ───────────────────────────────────────────────
 function SkillRadar({ skills }: { skills: Record<string, number> }) {
-    const cx = 130, cy = 130, maxR = 90;
+    const cx = 150, cy = 150, maxR = 90;
     const labels = Object.keys(skills);
     const values = Object.values(skills);
     const n = labels.length;
@@ -34,7 +34,7 @@ function SkillRadar({ skills }: { skills: Record<string, number> }) {
         .join(' ');
 
     return (
-        <svg viewBox="0 0 260 260" className="w-full max-w-[260px] mx-auto">
+        <svg viewBox="0 0 300 300" className="w-full max-w-[300px] mx-auto overflow-visible">
             {[20, 40, 60, 80, 100].map(lvl => (
                 <polygon key={lvl} points={gridPts(maxR * (lvl / 100))}
                     fill="none" stroke="#f3f4f6" strokeWidth="1.5" />
